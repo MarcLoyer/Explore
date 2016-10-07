@@ -1,0 +1,546 @@
+
+textures.pack.png
+size: 4096,1024
+format: RGBA8888
+filter: MipMap,MipMap
+repeat: none
+Axe
+  rotate: false
+  xy: 3600, 740
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+Axe2
+  rotate: false
+  xy: 3600, 482
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+jumping
+  rotate: false
+  xy: 3858, 635
+  size: 198, 319
+  orig: 198, 319
+  offset: 0, 0
+  index: -1
+stand
+  rotate: false
+  xy: 1450, 158
+  size: 177, 324
+  orig: 177, 324
+  offset: 0, 0
+  index: -1
+walking
+  rotate: false
+  xy: 2, 157
+  size: 179, 325
+  orig: 179, 325
+  offset: 0, 0
+  index: 0
+walking
+  rotate: false
+  xy: 183, 157
+  size: 179, 325
+  orig: 179, 325
+  offset: 0, 0
+  index: 1
+walking
+  rotate: false
+  xy: 364, 157
+  size: 179, 325
+  orig: 179, 325
+  offset: 0, 0
+  index: 2
+walking
+  rotate: false
+  xy: 545, 157
+  size: 179, 325
+  orig: 179, 325
+  offset: 0, 0
+  index: 3
+walking
+  rotate: false
+  xy: 726, 157
+  size: 179, 325
+  orig: 179, 325
+  offset: 0, 0
+  index: 4
+walking
+  rotate: false
+  xy: 907, 157
+  size: 179, 325
+  orig: 179, 325
+  offset: 0, 0
+  index: 5
+walking
+  rotate: false
+  xy: 1088, 157
+  size: 179, 325
+  orig: 179, 325
+  offset: 0, 0
+  index: 6
+walking
+  rotate: false
+  xy: 1269, 157
+  size: 179, 325
+  orig: 179, 325
+  offset: 0, 0
+  index: 7
+Door
+  rotate: false
+  xy: 1629, 226
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+Fence
+  rotate: false
+  xy: 3858, 436
+  size: 198, 197
+  orig: 198, 197
+  offset: 0, 0
+  index: -1
+Ladder
+  rotate: false
+  xy: 3951, 231
+  size: 128, 203
+  orig: 128, 203
+  offset: 0, 0
+  index: -1
+Eggplant
+  rotate: false
+  xy: 262, 27
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+Tomato
+  rotate: false
+  xy: 392, 27
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+banana
+  rotate: false
+  xy: 522, 27
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+Steel
+  rotate: false
+  xy: 1887, 226
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+Stone
+  rotate: false
+  xy: 1450, 2
+  size: 128, 154
+  orig: 128, 154
+  offset: 0, 0
+  index: -1
+Stone2
+  rotate: false
+  xy: 3951, 69
+  size: 128, 160
+  orig: 128, 160
+  offset: 0, 0
+  index: -1
+Stone3
+  rotate: false
+  xy: 1629, 65
+  size: 128, 159
+  orig: 128, 159
+  offset: 0, 0
+  index: -1
+box
+  rotate: false
+  xy: 884, 65
+  size: 128, 90
+  orig: 128, 90
+  offset: 0, 0
+  index: -1
+box_open
+  rotate: false
+  xy: 1014, 65
+  size: 128, 90
+  orig: 128, 90
+  offset: 0, 0
+  index: -1
+WoodenBoard2
+  rotate: false
+  xy: 652, 37
+  size: 128, 118
+  orig: 128, 118
+  offset: 0, 0
+  index: -1
+WoodenBoard3
+  rotate: false
+  xy: 132, 26
+  size: 128, 129
+  orig: 128, 129
+  offset: 0, 0
+  index: -1
+WoodenBoard4
+  rotate: false
+  xy: 2, 9
+  size: 128, 146
+  orig: 128, 146
+  offset: 0, 0
+  index: -1
+ball1
+  rotate: false
+  xy: 2, 484
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball2
+  rotate: false
+  xy: 516, 484
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball3
+  rotate: false
+  xy: 1030, 484
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball4
+  rotate: false
+  xy: 1544, 484
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball5
+  rotate: false
+  xy: 2058, 484
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball6
+  rotate: false
+  xy: 2572, 484
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball7
+  rotate: false
+  xy: 3086, 484
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+btnRedArrowDown
+  rotate: false
+  xy: 2145, 226
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedArrowDownPressed
+  rotate: false
+  xy: 2403, 226
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedArrowLeft
+  rotate: false
+  xy: 2661, 226
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedArrowLeftPressed
+  rotate: false
+  xy: 2919, 226
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedArrowRight
+  rotate: false
+  xy: 3177, 226
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedArrowRightPressed
+  rotate: false
+  xy: 3435, 224
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedArrowUp
+  rotate: false
+  xy: 3693, 178
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedText
+  rotate: false
+  xy: 3693, 448
+  size: 64, 32
+  split: 11, 12, 11, 10
+  orig: 64, 32
+  offset: 0, 0
+  index: -1
+btnRedTextPressed
+  rotate: false
+  xy: 3759, 448
+  size: 64, 32
+  split: 12, 12, 9, 11
+  pad: 13, 13, 10, 12
+  orig: 64, 32
+  offset: 0, 0
+  index: -1
+sliderThermBackground
+  rotate: false
+  xy: 3858, 956
+  size: 200, 40
+  orig: 200, 40
+  offset: 0, 0
+  index: -1
+sliderThermKnob
+  rotate: false
+  xy: 4058, 914
+  size: 20, 40
+  orig: 20, 40
+  offset: 0, 0
+  index: -1
+touchpadBackground
+  rotate: false
+  xy: 782, 55
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: -1
+touchpadKnob
+  rotate: false
+  xy: 1144, 91
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+
+textures.pack2.png
+size: 4096,1024
+format: RGBA8888
+filter: MipMap,MipMap
+repeat: none
+ball10
+  rotate: false
+  xy: 1030, 262
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball11
+  rotate: false
+  xy: 1544, 262
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball12
+  rotate: false
+  xy: 2058, 262
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball13
+  rotate: false
+  xy: 2572, 262
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball14
+  rotate: false
+  xy: 3086, 262
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball8
+  rotate: false
+  xy: 2, 262
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ball9
+  rotate: false
+  xy: 516, 262
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+btnRedArrowUpPressed
+  rotate: false
+  xy: 2, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedMenu
+  rotate: false
+  xy: 3600, 518
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedMenuPressed
+  rotate: false
+  xy: 260, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedMute
+  rotate: false
+  xy: 518, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedMutePressed
+  rotate: false
+  xy: 776, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedPause
+  rotate: false
+  xy: 1034, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedPausePressed
+  rotate: false
+  xy: 1292, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedPlay
+  rotate: false
+  xy: 1550, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedPlayPressed
+  rotate: false
+  xy: 1808, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedStop
+  rotate: false
+  xy: 2066, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedStopPressed
+  rotate: false
+  xy: 2324, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedUnmute
+  rotate: false
+  xy: 2582, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedUnmutePressed
+  rotate: false
+  xy: 2840, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedZoomIn
+  rotate: false
+  xy: 3098, 4
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedZoomInPressed
+  rotate: false
+  xy: 3600, 260
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedZoomOut
+  rotate: false
+  xy: 3356, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+btnRedZoomOutPressed
+  rotate: false
+  xy: 3614, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+
+textures.pack3.png
+size: 2048,1024
+format: RGBA8888
+filter: MipMap,MipMap
+repeat: none
+tiles_Green
+  rotate: false
+  xy: 2, 2
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+tiles_brown
+  rotate: false
+  xy: 1030, 516
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+ball15
+  rotate: false
+  xy: 2, 260
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+ballcue
+  rotate: false
+  xy: 516, 260
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
