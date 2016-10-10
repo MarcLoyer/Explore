@@ -55,6 +55,11 @@ public class PoolBall extends ModelInstance implements Disposable {
                 new btRigidBody.btRigidBodyConstructionInfo(mass, null, shape, localInertia);
         body = new btRigidBody(constructionInfo);
         body.setMotionState(motionState);
+
+        // experimenting with these settings...
+        body.setFriction(.3f);
+        body.setRollingFriction(.1f);
+        body.setRestitution(.1f);
     }
 
     public void updateMatrix() {
