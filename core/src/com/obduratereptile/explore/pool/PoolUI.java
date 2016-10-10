@@ -2,7 +2,10 @@ package com.obduratereptile.explore.pool;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -20,6 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.obduratereptile.explore.MainMenuScreen;
 
 /**
  * Created by Marc on 10/5/2016.
@@ -252,6 +256,11 @@ public class PoolUI {
                 screen.instances.get("ball9").transform.setTranslation(position);
                 position.add(colOffset);
                 screen.instances.get("ball7").transform.setTranslation(position);
+
+                for (int i=0; i<16; i++) {
+                    String key = (i==0)? "ballcue": "ball"+i;
+                    ((PoolBall)screen.instances.get(key)).updateMatrix();
+                }
             }
         });
         editPopup.add(btn).fillX().row();
@@ -301,6 +310,15 @@ public class PoolUI {
                 colOffset.z *= -1f;
                 position.add(rowOffset);
                 screen.instances.get("ball8").transform.setTranslation(position);
+
+                for (int i=0; i<16; i++) {
+                    String key = (i==0)? "ballcue": "ball"+i;
+                    PoolBall ball = (PoolBall)screen.instances.get(key);
+                    //TODO: these don't seem to do anything
+                    ball.body.setLinearVelocity(new Vector3(0,0,0));
+                    ball.body.setAngularVelocity(new Vector3(0,0,0));
+                    ball.updateMatrix();
+                }
             }
         });
         editPopup.add(btn).fillX().row();
@@ -406,5 +424,74 @@ public class PoolUI {
 
     public void setStatus(String s) {
         status.setText(s);
+    }
+
+    private Table debugMenu;
+    private Label fps;
+
+    public void createDebugMenu(Placement p) {
+        debugMenu = new Table();
+        //TODO: debug why button width is messed up
+        //TODO: implement callbacks for these buttons
+        TextButton btn;
+
+        fps = new Label("", skin, "default") {
+            @Override
+            public void act(float delta) {
+                this.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
+            }
+        };
+        fps.setAlignment(Align.center);
+        debugMenu.add(fps).fillX().row();
+
+        btn = new TextButton("Debug", skin, "default");
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                screen.debug = !screen.debug;
+            }
+        });
+        debugMenu.add(btn).fillX().row();
+
+        btn = new TextButton("Normal", skin, "default");
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Experiment - load a normal map onto one of the corner pockets
+                Material mat = screen.instances.get("table").getNode("PocketJacket", true).parts.get(0).material;
+                if (mat.has(TextureAttribute.Normal)) {
+                    Gdx.app.error("EX", "Removing normal texture attribute");
+                    mat.remove(TextureAttribute.Normal);
+                } else {
+                    Gdx.app.error("EX", "Setting normal texture attribute");
+                    TextureAttribute tA = new TextureAttribute(TextureAttribute.Normal, new Texture(Gdx.files.internal("meshes/brownleatherNormal.jpg")));
+                    mat.set(tA);
+                }
+                Gdx.app.error("EX", "isChecked() == " + ((TextButton)event.getListenerActor()).isChecked());
+            }
+        });
+        debugMenu.add(btn).fillX().row();
+
+        btn = new TextButton("Main Menu", skin, "default");
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                screen.game.setScreen(new MainMenuScreen(screen.game));
+            }
+        });
+        debugMenu.add(btn).fillX().row();
+
+        float w = stage.getWidth();
+        float h = stage.getHeight();
+
+        //TODO: implement other placement cases
+        switch (p) {
+            case LR:
+            default:
+                debugMenu.setPosition(w-100, 120);
+                break;
+        }
+
+        stage.addActor(debugMenu);
     }
 }

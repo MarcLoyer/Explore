@@ -36,6 +36,9 @@ import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.bullet.Bullet;
+import com.badlogic.gdx.physics.bullet.DebugDrawer;
+import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -84,8 +87,12 @@ public class PoolPlayScreen implements Screen {
     CameraInputController camController;
 
     TextureAtlas atlas;
-    World world;
 
+    PoolPhysics poolPhysics;
+
+    boolean debug = false;
+    DebugDrawer debugDrawer;
+    boolean pause = true;
     final float SPINSPEED = 90;
     boolean spin = false;
 
@@ -150,42 +157,10 @@ public class PoolPlayScreen implements Screen {
         // create the UI
         poolUI = new PoolUI(this);
 
-        TextButton btn = new TextButton("MainMenu", skin);
-        btn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new MainMenuScreen(game));
-            }
-        });
-        btn.setPosition(850, 20);
-        btn.setSize(100, 50);
-        stage.addActor(btn);
-
-        btn = new TextButton("Normal", skin);
-        btn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // Experiment - load a normal map onto one of the corner pockets
-                Material mat = instances.get("table").getNode("PocketJacket", true).parts.get(0).material;
-                if (mat.has(TextureAttribute.Normal)) {
-                    Gdx.app.error("EX", "Removing normal texture attribute");
-                    mat.remove(TextureAttribute.Normal);
-                } else {
-                    Gdx.app.error("EX", "Setting normal texture attribute");
-                    TextureAttribute tA = new TextureAttribute(TextureAttribute.Normal, new Texture(Gdx.files.internal("meshes/brownleatherNormal.jpg")));
-                    mat.set(tA);
-                }
-                Gdx.app.error("EX", "isChecked() == " + ((TextButton)event.getListenerActor()).isChecked());
-            }
-        });
-        btn.setPosition(850, 90);
-        btn.setSize(100, 50);
-        stage.addActor(btn);
-
         ImageButton btnImage = new ImageButton(
-                new SpriteDrawable(atlas.createSprite("btnRedArrowUp")),
-                new SpriteDrawable(atlas.createSprite("btnRedArrowUpPressed")),
-                new SpriteDrawable(atlas.createSprite("btnRedStop"))
+                new SpriteDrawable(atlas.createSprite("btnRedPlay")),
+                new SpriteDrawable(atlas.createSprite("btnRedPlayPressed")),
+                new SpriteDrawable(atlas.createSprite("btnRedPause"))
         );
         btnImage.setPosition(50, 20);
         btnImage.setSize(50, 50);
@@ -193,7 +168,8 @@ public class PoolPlayScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ImageButton btn = (ImageButton)event.getListenerActor();
-                spin = btn.isChecked();
+                //spin = btn.isChecked();
+                pause = !btn.isChecked();
 
                 //CueStick c = (CueStick)(instances.get("cuestick"));
                 //c.setTipTransparency((c.getTipTransparency()+0.1f)%1.0f);
@@ -206,8 +182,11 @@ public class PoolPlayScreen implements Screen {
         poolUI.createEditControls(PoolUI.Placement.ML);
         poolUI.createShotControls(PoolUI.Placement.ML);
         poolUI.createStatusLine();
+        poolUI.createDebugMenu(PoolUI.Placement.LR);
 
         // create the game objects
+        PoolPhysics.init();
+
         shader = new DefaultShaderProvider(); // TODO: roll my own so I can get normal mapping working
         mbatch = new ModelBatch(shader);
         mbuilder = new ModelBuilder();
@@ -216,7 +195,9 @@ public class PoolPlayScreen implements Screen {
         //Notes on exporting blender models:
         //   Objects will be placed where they existed in blender, so move stuff to the origin
         //  before you export.
-        // Select the objects you want to export
+        //   Select the objects you want to export, Ctrl-A>Scale to bake scale factors into the
+        // geometry (bullet collision objects don't read scale, so this needs to be baked into
+        // all exported models)
         // File>Export>FBX
         //   - "Main"
         //   - "Selected Objects" CHECKED
@@ -231,25 +212,27 @@ public class PoolPlayScreen implements Screen {
         UBJsonReader jsonReader = new UBJsonReader();
         G3dModelLoader mloaderg3d = new G3dModelLoader(jsonReader);
 
-        // Our mesh is a single ball. We generate all the other
-        // balls from this by reassigning the texture of each instance.
-        mdl = mloaderg3d.loadModel(Gdx.files.internal("meshes/poolball.g3db"));
+        // Our world scale is 1 unit = 1 inch.
+        mdl = mloaderg3d.loadModel(Gdx.files.internal("meshes/pool.g3db"));
         ModelInstance inst;
+
+        // We generate all the balls from a single mesh by assigning the texture of each instance.
         TextureAttribute tA;
         for (int i=0; i<16; i++) {
             String id = (i==15)? "ballcue": "ball"+(i+1);
             tA = new TextureAttribute(TextureAttribute.Diffuse, atlas.createSprite(id));
-            inst = new PoolBall(mdl, "ball", id, tA, null);
+            inst = new PoolBall(mdl, "ball", i, tA);
 
-            float x = -4.5f + ((i%4) * 3.0f);
-            float z = -4.5f + ((i/4) * 3.0f);
-            inst.transform.setToTranslation(x, 0, z);
+            float offset = 4.0f; // 4 inches
+            float x = -1.5f*offset + ((i%4) * offset);
+            float z = -1.5f*offset + ((i/4) * offset);
+            inst.transform.setToTranslation(x, 0, z); //TODO: once static body works, change back to y=0
+            ((PoolBall)inst).updateMatrix();
             instances.put(id, inst);
         }
 
-        mdl = mloaderg3d.loadModel(Gdx.files.internal("meshes/table.g3db"));
-        inst = new ModelInstance(mdl, "Bed");
-        inst.transform.setToTranslation(0, -1.125f, 0);
+        inst = new PoolTable(mdl, "Bed", 20);
+        //inst.transform.setToTranslation(0, -2.25f - .1f, 0); // this should be baked into my model now
         instances.put("table", inst);
 
         cueStick = new CueStick(mdl, "CueStick");
@@ -259,7 +242,7 @@ public class PoolPlayScreen implements Screen {
 
         headArea = new ModelInstance(mdl, "HeadArea");
         bedArea = new ModelInstance(mdl, "BedArea");
-        instances.put("headArea", headArea);
+        //instances.put("headArea", headArea);
 
         // TODO: lookup later:
         //  * libGDX FirstPersonCameraController
@@ -277,6 +260,16 @@ public class PoolPlayScreen implements Screen {
         env.add((shadowLight).set(Color.WHITE, shadowDirection));
         env.shadowMap = shadowLight;
         shadowBatch = new ModelBatch(new DepthShaderProvider());
+
+        // adding physics :)
+        poolPhysics = new PoolPhysics(this);
+
+        debugDrawer = new DebugDrawer();
+        poolPhysics.dynamicsWorld.setDebugDrawer(debugDrawer);
+        debugDrawer.setDebugMode(btIDebugDraw.DebugDrawModes.DBG_MAX_DEBUG_DRAW_MODE);
+
+        // debug ... remove the table to be able to see the collision objects better
+        //instances.removeKey("table");
     }
 
     @Override
@@ -301,6 +294,9 @@ public class PoolPlayScreen implements Screen {
             shadowLight.setDirection(shadowDirection.rotate(deg, 0, 1, 0));
         }
 
+        // adding physics :)
+        if (!pause) poolPhysics.act(delta);
+
         // Experimenting with shadows...
         shadowLight.begin(Vector3.Zero, camera.direction);
         shadowBatch.begin(shadowLight.getCamera());
@@ -312,6 +308,12 @@ public class PoolPlayScreen implements Screen {
         mbatch.begin(camera);
         mbatch.render(instances.values(), env);
         mbatch.end();
+
+        if (debug) {
+            debugDrawer.begin(camera);
+            poolPhysics.dynamicsWorld.debugDrawWorld();
+            debugDrawer.end();
+        }
 
         // manage the UI
         stage.act(delta);
@@ -351,7 +353,6 @@ public class PoolPlayScreen implements Screen {
     @Override
     public void dispose() {
         atlas.dispose();
-        world.dispose();
         mdl.dispose();
         mbatch.dispose();
         instances.clear();
@@ -387,7 +388,7 @@ public class PoolPlayScreen implements Screen {
                 ModelInstance ival = instances.get(key);
                 if (ival == null) {
                     TextureAttribute tA = new TextureAttribute(TextureAttribute.Diffuse, atlas.createSprite(key));
-                    ival = new PoolBall(mdl, "ball", key, tA, null); //TODO: set btConstructionInfo arg properly
+                    ival = new PoolBall(mdl, "ball", i, tA); //TODO: set btConstructionInfo arg properly
                     ival.transform.set(tval);
                     instances.put(key, ival);
                 } else {

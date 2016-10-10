@@ -70,7 +70,7 @@ public class MainMenuScreen implements Screen {
         });
         table.add(btn).fillX().row();
 
-        btn = new TextButton("Play example 3D game", skin);
+        btn = new TextButton("Play Pool 3D game", skin);
         btn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -97,15 +97,21 @@ public class MainMenuScreen implements Screen {
         });
         table.add(btn).fillX().row();
 
+        btn = new TextButton("Xoppa Bullet 2", skin);
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new XoppaBulletScreen2(game));
+            }
+        });
+        table.add(btn).fillX().row();
+
         // TODO: fix the skin
         Button.ButtonStyle btnStyle = btn.getStyle();
         btnStyle.up = new NinePatchDrawable(atlas.createPatch("btnRedText"));
         btnStyle.down = new NinePatchDrawable(atlas.createPatch("btnRedTextPressed"));
         btn.setStyle(btnStyle);
 
-        btn = new TextButton("REEEALLY LLLOOONNNGGG text button", skin);
-        btn.setPosition(50, 50);
-        stage.addActor(btn);
     }
 
     @Override

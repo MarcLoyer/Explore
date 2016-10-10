@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
@@ -17,34 +19,21 @@ import com.badlogic.gdx.utils.Disposable;
 /**
  * Created by Marc on 10/4/2016.
  */
-class MyMotionState extends btMotionState {
-    Matrix4 transform;
-    @Override
-    public void getWorldTransform (Matrix4 worldTrans) {
-        worldTrans.set(transform);
-    }
-    @Override
-    public void setWorldTransform (Matrix4 worldTrans) {
-        transform.set(worldTrans);
-    }
-}
-
 public class PoolBall extends ModelInstance implements Disposable {
-    public String id;
+    public int id;
 
     public BoundingBox bounds = new BoundingBox();
     public Vector3 center = new Vector3();
     public float radius;
 
-//    public Vector2 position;
-//    public Vector2 velocity;
-//    public Vector3 rotationAxis;
-//    public float rotationVelocity;
+    public final btRigidBody body;
+    public final PoolMotionState motionState;
+    public final btCollisionShape shape;
+    public final float mass;
+    private static Vector3 localInertia = new Vector3();
+    public final btRigidBody.btRigidBodyConstructionInfo constructionInfo;
 
-    //public final btRigidBody body;
-    //public final MyMotionState motionState;
-
-    public PoolBall(Model model, String node, String id, TextureAttribute taImg, btRigidBody.btRigidBodyConstructionInfo constructionInfo) {
+    public PoolBall(Model model, String node, int id, TextureAttribute taImg) {
         super(model, node);
         getMaterial("ballMaterial").set(taImg);
 
@@ -54,15 +43,29 @@ public class PoolBall extends ModelInstance implements Disposable {
         bounds.getCenter(center);
         radius = bounds.getWidth() / 2.0f;
 
-        //motionState = new MyMotionState();
-        //motionState.transform = transform;
-        //body = new btRigidBody(constructionInfo);
-        //body.setMotionState(motionState);
+        shape = new btSphereShape(radius);
+        mass = 0.170f; // 6 oz
+
+        motionState = new PoolMotionState();
+        motionState.transform = transform;
+
+        shape.calculateLocalInertia(mass, localInertia);
+
+        constructionInfo =
+                new btRigidBody.btRigidBodyConstructionInfo(mass, null, shape, localInertia);
+        body = new btRigidBody(constructionInfo);
+        body.setMotionState(motionState);
+    }
+
+    public void updateMatrix() {
+        body.proceedToTransform(transform);
     }
 
     @Override
     public void dispose () {
-        //body.dispose();
-        //motionState.dispose();
+        body.dispose();
+        motionState.dispose();
+        shape.dispose();
+        constructionInfo.dispose();
     }
 }
