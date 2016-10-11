@@ -128,6 +128,7 @@ public class PoolInputAdapter extends InputAdapter {
         for (int i = 0; i < 16; ++i) {
             String key = (i==0)? "ballcue": "ball"+i;
             final PoolBall instance = (PoolBall)screen.instances.get(key);
+            if (instance == null) continue; // this ball has been hidden, so skip it
 
             instance.transform.getTranslation(position);
             position.add(instance.center);

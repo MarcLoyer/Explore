@@ -151,6 +151,7 @@ public class PoolUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 screen.poolInputAdapter.state = PoolInputAdapter.State.EDIT;
+                screen.pause = true;
                 editPopup.setVisible(true);
                 menuPopup.setVisible(false);
             }
@@ -194,7 +195,6 @@ public class PoolUI {
 
     public void createEditControls(Placement p) {
         editPopup = new Table();
-        //TODO: debug why button width is messed up
         //TODO: implement callbacks for these buttons
         TextButton btn;
 
@@ -209,58 +209,50 @@ public class PoolUI {
                 float cos = dia * MathUtils.cosDeg(30);
                 Vector3 rowOffset = new Vector3(cos, 0, sin);
                 Vector3 colOffset = new Vector3(0, 0, -dia);
-                Gdx.app.error("EX", "dia = " + dia);
-
-                //TODO: make sure all 16 balls are in the instances map
 
                 position.set(-20.8f, 0, 0); // head spot
-                screen.instances.get("ballcue").transform.setTranslation(position);
+                screen.poolPhysics.showBall(0, position);
 
                 position.set(20.8f, 0, 0); // foot spot
-                screen.instances.get("ball1").transform.setTranslation(position);
+                screen.poolPhysics.showBall(1, position);
 
                 position.add(rowOffset);
-                screen.instances.get("ball15").transform.setTranslation(position);
+                screen.poolPhysics.showBall(15, position);
                 position.add(colOffset);
-                screen.instances.get("ball2").transform.setTranslation(position);
+                screen.poolPhysics.showBall(2, position);
 
                 rowOffset.z *= -1f;
                 colOffset.z *= -1f;
                 position.add(rowOffset);
-                screen.instances.get("ball14").transform.setTranslation(position);
+                screen.poolPhysics.showBall(14, position);
                 position.add(colOffset);
-                screen.instances.get("ball8").transform.setTranslation(position);
+                screen.poolPhysics.showBall(8, position);
                 position.add(colOffset);
-                screen.instances.get("ball13").transform.setTranslation(position);
+                screen.poolPhysics.showBall(13, position);
 
                 rowOffset.z *= -1f;
                 colOffset.z *= -1f;
                 position.add(rowOffset);
-                screen.instances.get("ball3").transform.setTranslation(position);
+                screen.poolPhysics.showBall(3, position);
                 position.add(colOffset);
-                screen.instances.get("ball12").transform.setTranslation(position);
+                screen.poolPhysics.showBall(12, position);
                 position.add(colOffset);
-                screen.instances.get("ball4").transform.setTranslation(position);
+                screen.poolPhysics.showBall(4, position);
                 position.add(colOffset);
-                screen.instances.get("ball11").transform.setTranslation(position);
+                screen.poolPhysics.showBall(11, position);
 
                 rowOffset.z *= -1f;
                 colOffset.z *= -1f;
                 position.add(rowOffset);
-                screen.instances.get("ball5").transform.setTranslation(position);
+                screen.poolPhysics.showBall(5, position);
                 position.add(colOffset);
-                screen.instances.get("ball10").transform.setTranslation(position);
+                screen.poolPhysics.showBall(10, position);
                 position.add(colOffset);
-                screen.instances.get("ball6").transform.setTranslation(position);
+                screen.poolPhysics.showBall(6, position);
                 position.add(colOffset);
-                screen.instances.get("ball9").transform.setTranslation(position);
+                screen.poolPhysics.showBall(9, position);
                 position.add(colOffset);
-                screen.instances.get("ball7").transform.setTranslation(position);
-
-                for (int i=0; i<16; i++) {
-                    String key = (i==0)? "ballcue": "ball"+i;
-                    ((PoolBall)screen.instances.get(key)).updateMatrix();
-                }
+                screen.poolPhysics.showBall(7, position);
             }
         });
         editPopup.add(btn).fillX().row();
@@ -276,49 +268,41 @@ public class PoolUI {
                 float cos = dia * MathUtils.cosDeg(30);
                 Vector3 rowOffset = new Vector3(cos, 0, sin);
                 Vector3 colOffset = new Vector3(0, 0, -dia);
-                Gdx.app.error("EX", "dia = " + dia);
 
-                //TODO: make sure only the 10 balls are in the instances map
+                for (int i=10; i<16; i++) {
+                    screen.poolPhysics.hideBall(i);
+                }
 
                 position.set(-20.8f, 0, 0); // head spot
-                screen.instances.get("ballcue").transform.setTranslation(position);
+                screen.poolPhysics.showBall(0, position);
 
                 position.set(20.8f, 0, 0); // foot spot
-                screen.instances.get("ball1").transform.setTranslation(position);
+                screen.poolPhysics.showBall(1, position);
 
                 position.add(rowOffset);
-                screen.instances.get("ball2").transform.setTranslation(position);
+                screen.poolPhysics.showBall(2, position);
                 position.add(colOffset);
-                screen.instances.get("ball3").transform.setTranslation(position);
+                screen.poolPhysics.showBall(3, position);
 
                 rowOffset.z *= -1f;
                 colOffset.z *= -1f;
                 position.add(rowOffset);
-                screen.instances.get("ball5").transform.setTranslation(position);
+                screen.poolPhysics.showBall(5, position);
                 position.add(colOffset);
-                screen.instances.get("ball9").transform.setTranslation(position);
+                screen.poolPhysics.showBall(9, position);
                 position.add(colOffset);
-                screen.instances.get("ball4").transform.setTranslation(position);
+                screen.poolPhysics.showBall(4, position);
 
                 colOffset.z *= -1f;
                 position.add(rowOffset);
-                screen.instances.get("ball6").transform.setTranslation(position);
+                screen.poolPhysics.showBall(6, position);
                 position.add(colOffset);
-                screen.instances.get("ball7").transform.setTranslation(position);
+                screen.poolPhysics.showBall(7, position);
 
                 rowOffset.z *= -1f;
                 colOffset.z *= -1f;
                 position.add(rowOffset);
-                screen.instances.get("ball8").transform.setTranslation(position);
-
-                for (int i=0; i<16; i++) {
-                    String key = (i==0)? "ballcue": "ball"+i;
-                    PoolBall ball = (PoolBall)screen.instances.get(key);
-                    //TODO: these don't seem to do anything
-                    ball.body.setLinearVelocity(new Vector3(0,0,0));
-                    ball.body.setAngularVelocity(new Vector3(0,0,0));
-                    ball.updateMatrix();
-                }
+                screen.poolPhysics.showBall(8, position);
             }
         });
         editPopup.add(btn).fillX().row();
@@ -331,6 +315,17 @@ public class PoolUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 screen.poolInputAdapter.state = PoolInputAdapter.State.DISABLED;
+
+                for (int i=0; i<16; i++) {
+                    String key = (i==0)? "ballcue": "ball"+i;
+                    PoolBall ball = (PoolBall)screen.instances.get(key);
+                    //TODO: these don't seem to do anything
+                    ball.body.setLinearVelocity(new Vector3(0,0,0));
+                    ball.body.setAngularVelocity(new Vector3(0,0,0));
+                    ball.updateMatrix();
+                }
+
+                screen.pause = false;
                 editPopup.setVisible(false);
             }
         });

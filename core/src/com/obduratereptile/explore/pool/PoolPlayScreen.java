@@ -72,8 +72,8 @@ public class PoolPlayScreen implements Screen {
     ObjLoader mloader;
     Model mdl;
     ArrayMap<String, ModelInstance> instances;
-    CueStick cueStick;
-    ModelInstance headArea, bedArea;
+    ArrayMap<String, ModelInstance> balls;
+    ArrayMap<String, ModelInstance> otherObjects;
     Environment env;
     //experimenting with shadows...
     DirectionalShadowLight shadowLight;
@@ -133,6 +133,9 @@ public class PoolPlayScreen implements Screen {
         Gdx.input.setInputProcessor(inputMux);
 
         instances = new ArrayMap<String, ModelInstance>();
+        balls = new ArrayMap<String, ModelInstance>();
+        otherObjects = new ArrayMap<String, ModelInstance>();
+
         shadowDirection = new Vector3(-1f, -.8f, -.2f);
 
         poolInputAdapter = new PoolInputAdapter(this);
@@ -226,22 +229,27 @@ public class PoolPlayScreen implements Screen {
             float offset = 4.0f; // 4 inches
             float x = -1.5f*offset + ((i%4) * offset);
             float z = -1.5f*offset + ((i/4) * offset);
-            inst.transform.setToTranslation(x, 0, z); //TODO: once static body works, change back to y=0
+            inst.transform.setToTranslation(x, 0, z);
             ((PoolBall)inst).updateMatrix();
+
+            balls.put(id, inst);
             instances.put(id, inst);
         }
 
         inst = new PoolTable(mdl, "Bed", 20);
-        //inst.transform.setToTranslation(0, -2.25f - .1f, 0); // this should be baked into my model now
+        otherObjects.put("table", inst);
         instances.put("table", inst);
 
-        cueStick = new CueStick(mdl, "CueStick");
-        cueStick.transform.setToTranslation(0, 1, 0);
-        ((CueStick)cueStick).setColor(.0f, .0f, 1.0f);
+        inst = new CueStick(mdl, "CueStick");
+        inst.transform.setToTranslation(0, -10, 0); // get it out of the way
+        ((CueStick)inst).setColor(.0f, .0f, 1.0f);
+        otherObjects.put("cuestick", inst);
         //instances.put("cuestick", cueStick);
 
-        headArea = new ModelInstance(mdl, "HeadArea");
-        bedArea = new ModelInstance(mdl, "BedArea");
+        inst = new ModelInstance(mdl, "HeadArea");
+        otherObjects.put("headArea", inst);
+        inst = new ModelInstance(mdl, "BedArea");
+        otherObjects.put("bedArea", inst);
         //instances.put("headArea", headArea);
 
         // TODO: lookup later:

@@ -27,19 +27,6 @@ public class PoolTable extends ModelInstance implements Disposable {
     private static Vector3 localInertia = new Vector3(0,0,0);
     public final btRigidBody.btRigidBodyConstructionInfo constructionInfo;
 
-//    public PoolTable(Model model) {
-//        super(model, "ground");
-//        motionState = new PoolMotionState();
-//        motionState.transform = transform;
-//
-//        shape = new btBoxShape(new Vector3(2.5f, 0.5f, 2.5f));
-//        constructionInfo =
-//                new btRigidBody.btRigidBodyConstructionInfo(0, null, shape, new Vector3(0,0,0));
-//
-//        body = new btRigidBody(constructionInfo);
-//        body.setMotionState(motionState);
-//    }
-
     public PoolTable(Model model, String node, int id) {
         super(model, node);
         motionState = new PoolMotionState();

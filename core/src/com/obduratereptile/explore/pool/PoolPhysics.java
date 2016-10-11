@@ -94,9 +94,6 @@ public class PoolPhysics {
         bodyTable.setActivationState(Collision.DISABLE_DEACTIVATION);
         dynamicsWorld.addRigidBody(bodyTable);
 
-        //TODO: construct bed and cushion and pocket static objects
-        Gdx.app.error("EX", "bodyTable.isStaticObject() = " + bodyTable.isStaticObject());
-
         contactListener = new MyContactListener();
     }
 
@@ -104,11 +101,40 @@ public class PoolPhysics {
         btRigidBody obj = ball.body;
         obj.proceedToTransform(ball.transform);
         obj.setUserValue(ball.id);
-        //obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-        obj.setActivationState(Collision.DISABLE_DEACTIVATION);
+        //obj.setActivationState(Collision.DISABLE_DEACTIVATION);
         dynamicsWorld.addRigidBody(obj);
-        obj.setContactCallbackFlag(OBJECT_FLAG); //TODO: what does this do again?
+        obj.setContactCallbackFlag(OBJECT_FLAG);
         obj.setContactCallbackFilter(GROUND_FLAG);
+    }
+
+    public void showBall(int id, Vector3 pos) {
+        String key = (id==0)? "ballcue": "ball"+id;
+        PoolBall b = (PoolBall)screen.balls.get(key);
+
+        // add the ball to the render loop
+        if (!screen.instances.containsKey(key)) screen.instances.put(key, b);
+
+        // move the ball back onto the playing surface
+        b.transform.setToTranslation(pos);
+        b.updateMatrix();
+
+        // wake it up
+        b.body.activate();
+    }
+
+    public void hideBall(int id) {
+        String key = (id==0)? "ballcue": "ball"+id;
+        PoolBall b = (PoolBall)screen.balls.get(key);
+
+        // remove the ball from the render loop
+        screen.instances.removeKey(key);
+
+        // move the ball out of the way
+        b.transform.setToTranslation(10*id, -10, 0);
+        b.updateMatrix();
+
+        // put it to sleep
+        b.body.setActivationState(Collision.DISABLE_SIMULATION);
     }
 
     public void act(float del) {
