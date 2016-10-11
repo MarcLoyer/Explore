@@ -100,25 +100,6 @@ public class PoolInputAdapter extends InputAdapter {
         }
     }
 
-//    public int getObject (int screenX, int screenY) {
-//        Ray ray = screen.camera.getPickRay(screenX, screenY);
-//        int result = -1;
-//        float distance = -1;
-//        for (int i = 0; i < 16; ++i) {
-//            String key = (i==0)? "ballcue": "ball"+i;
-//            final PoolBall instance = (PoolBall)screen.instances.get(key);
-//            instance.transform.getTranslation(position);
-//            position.add(instance.center);
-//            float dist2 = ray.origin.dst2(position);
-//            if (distance >= 0f && dist2 > distance) continue;
-//            if (Intersector.intersectRaySphere(ray, position, instance.radius, null)) {
-//                result = i;
-//                distance = dist2;
-//            }
-//        }
-//        return result;
-//    }
-
     public int getObject (int screenX, int screenY) {
         Ray ray = screen.camera.getPickRay(screenX, screenY);
 

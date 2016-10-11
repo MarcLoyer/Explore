@@ -204,16 +204,16 @@ public class PoolUI {
             public void clicked(InputEvent event, float x, float y) {
                 Vector3 position = new Vector3();
 
-                float dia = ((PoolBall)screen.instances.get("ballcue")).radius * 2.0f;
+                float dia = ((PoolBall)screen.balls.get("ballcue")).radius * 2.0f;
                 float sin = dia * MathUtils.sinDeg(30);
                 float cos = dia * MathUtils.cosDeg(30);
                 Vector3 rowOffset = new Vector3(cos, 0, sin);
                 Vector3 colOffset = new Vector3(0, 0, -dia);
 
-                position.set(-20.8f, 0, 0); // head spot
+                position.set(-22.6f, 0, 0); // head spot
                 screen.poolPhysics.showBall(0, position);
 
-                position.set(20.8f, 0, 0); // foot spot
+                position.set(22.6f, 0, 0); // foot spot
                 screen.poolPhysics.showBall(1, position);
 
                 position.add(rowOffset);
@@ -263,7 +263,7 @@ public class PoolUI {
             public void clicked(InputEvent event, float x, float y) {
                 Vector3 position = new Vector3();
 
-                float dia = ((PoolBall)screen.instances.get("ballcue")).radius * 2.0f;
+                float dia = ((PoolBall)screen.balls.get("ballcue")).radius * 2.0f;
                 float sin = dia * MathUtils.sinDeg(30);
                 float cos = dia * MathUtils.cosDeg(30);
                 Vector3 rowOffset = new Vector3(cos, 0, sin);
@@ -273,10 +273,10 @@ public class PoolUI {
                     screen.poolPhysics.hideBall(i);
                 }
 
-                position.set(-20.8f, 0, 0); // head spot
+                position.set(-22.6f, 0, 2); // head spot
                 screen.poolPhysics.showBall(0, position);
 
-                position.set(20.8f, 0, 0); // foot spot
+                position.set(22.6f, 0, 0); // foot spot
                 screen.poolPhysics.showBall(1, position);
 
                 position.add(rowOffset);
@@ -318,7 +318,7 @@ public class PoolUI {
 
                 for (int i=0; i<16; i++) {
                     String key = (i==0)? "ballcue": "ball"+i;
-                    PoolBall ball = (PoolBall)screen.instances.get(key);
+                    PoolBall ball = (PoolBall)screen.balls.get(key);
                     //TODO: these don't seem to do anything
                     ball.body.setLinearVelocity(new Vector3(0,0,0));
                     ball.body.setAngularVelocity(new Vector3(0,0,0));
@@ -453,7 +453,7 @@ public class PoolUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 // Experiment - load a normal map onto one of the corner pockets
-                Material mat = screen.instances.get("table").getNode("PocketJacket", true).parts.get(0).material;
+                Material mat = screen.otherObjects.get("table").getNode("PocketJacket", true).parts.get(0).material;
                 if (mat.has(TextureAttribute.Normal)) {
                     Gdx.app.error("EX", "Removing normal texture attribute");
                     mat.remove(TextureAttribute.Normal);

@@ -81,11 +81,11 @@ public class PoolPhysics {
         // add all the PoolBalls to the simulation
         for (int i=0; i<16; i++) {
             String key = (i==0)? "ballcue": "ball"+i;
-            addBalltoWorld((PoolBall)screen.instances.get(key));
+            addBalltoWorld((PoolBall)screen.balls.get(key));
         }
 
         // add static body (the table) to the simulation
-        btRigidBody bodyTable = ((PoolTable)screen.instances.get("table")).body;
+        btRigidBody bodyTable = ((PoolTable)screen.otherObjects.get("table")).body;
         bodyTable.setUserValue(20);
         bodyTable.setCollisionFlags(bodyTable.getCollisionFlags()
                 | btCollisionObject.CollisionFlags.CF_STATIC_OBJECT);
@@ -93,6 +93,15 @@ public class PoolPhysics {
         bodyTable.setContactCallbackFilter(0);
         bodyTable.setActivationState(Collision.DISABLE_DEACTIVATION);
         dynamicsWorld.addRigidBody(bodyTable);
+
+        // add the cuestick to the simulation
+        btRigidBody bodyStick = ((CueStick)screen.otherObjects.get("cuestick")).body;
+        bodyTable.setUserValue(40);
+        bodyTable.setCollisionFlags(bodyTable.getCollisionFlags()
+                | btCollisionObject.CollisionFlags.CF_KINEMATIC_OBJECT);
+        bodyTable.setContactCallbackFlag(GROUND_FLAG);
+        bodyTable.setContactCallbackFilter(0);
+        dynamicsWorld.addRigidBody(bodyStick);
 
         contactListener = new MyContactListener();
     }

@@ -173,9 +173,6 @@ public class PoolPlayScreen implements Screen {
                 ImageButton btn = (ImageButton)event.getListenerActor();
                 //spin = btn.isChecked();
                 pause = !btn.isChecked();
-
-                //CueStick c = (CueStick)(instances.get("cuestick"));
-                //c.setTipTransparency((c.getTipTransparency()+0.1f)%1.0f);
             }
         });
         stage.addActor(btnImage);
@@ -241,16 +238,17 @@ public class PoolPlayScreen implements Screen {
         instances.put("table", inst);
 
         inst = new CueStick(mdl, "CueStick");
-        inst.transform.setToTranslation(0, -10, 0); // get it out of the way
+        inst.transform.setToTranslation(0, -10, -10); // get it out of the way
+        ((CueStick)inst).updateMatrix();
         ((CueStick)inst).setColor(.0f, .0f, 1.0f);
         otherObjects.put("cuestick", inst);
-        //instances.put("cuestick", cueStick);
+        //instances.put("cuestick", inst);
 
         inst = new ModelInstance(mdl, "HeadArea");
         otherObjects.put("headArea", inst);
         inst = new ModelInstance(mdl, "BedArea");
         otherObjects.put("bedArea", inst);
-        //instances.put("headArea", headArea);
+        //instances.put("headArea", inst);
 
         // TODO: lookup later:
         //  * libGDX FirstPersonCameraController
@@ -390,18 +388,13 @@ public class PoolPlayScreen implements Screen {
         for (int i=0; i<16; i++) {
             String key = (i==0)? "ballcue": "ball"+i;
             Matrix4 tval = t.get(key);
-            if (tval == null) {
-                instances.removeKey(key);
-            } else {
-                ModelInstance ival = instances.get(key);
-                if (ival == null) {
-                    TextureAttribute tA = new TextureAttribute(TextureAttribute.Diffuse, atlas.createSprite(key));
-                    ival = new PoolBall(mdl, "ball", i, tA); //TODO: set btConstructionInfo arg properly
-                    ival.transform.set(tval);
-                    instances.put(key, ival);
-                } else {
-                    ival.transform.set(tval);
-                }
+
+            if (tval == null) { // the ball is not listed in the tableState, so hide it
+                poolPhysics.hideBall(i);
+            } else { // the ball is listed, so show it
+                Vector3 v = new Vector3();
+                balls.get(key).transform.getTranslation(v);
+                poolPhysics.showBall(i, v);
             }
         }
     }
