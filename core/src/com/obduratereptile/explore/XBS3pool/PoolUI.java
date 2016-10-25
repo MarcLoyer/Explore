@@ -1,4 +1,4 @@
-package com.obduratereptile.explore.pool;
+package com.obduratereptile.explore.XBS3pool;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
@@ -12,7 +12,6 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
@@ -22,11 +21,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.obduratereptile.explore.MainMenuScreen;
+import com.obduratereptile.explore.XoppaBulletScreen3;
+import com.obduratereptile.explore.pool.CueStick;
+import com.obduratereptile.explore.pool.CueStickAccessor;
+import com.obduratereptile.explore.pool.PoolBall;
 
 import aurelienribon.tweenengine.Timeline;
 import aurelienribon.tweenengine.Tween;
@@ -37,7 +39,7 @@ import aurelienribon.tweenengine.Tween;
 public class PoolUI {
     public enum Placement {LL, LR, UL, UR, ML, MR, LM, UM}
 
-    public PoolPlayScreen screen;
+    public XoppaBulletScreen3 screen;
     public AssetManager manager;
     public Skin skin;
     public TextureAtlas atlas;
@@ -46,7 +48,7 @@ public class PoolUI {
     static private final float ZOOMMAX = 1.0f;
     static private final float ZOOMMIN = 100.0f;
 
-    public PoolUI(PoolPlayScreen screen) {
+    public PoolUI(XoppaBulletScreen3 screen) {
         this.screen = screen;
         this.manager = screen.manager;
         this.skin = screen.skin;
@@ -377,7 +379,7 @@ public class PoolUI {
 
         Label lblAngle = new Label("Cue Angle", skin, "default");
         lblAngle.setAlignment(Align.bottom);
-        
+
         Touchpad touchAngle = new Touchpad(5, skin, "default");
         touchAngle.getStyle().background = new SpriteDrawable(atlas.createSprite("touchpadBackground"));
         touchAngle.getStyle().knob = new SpriteDrawable(atlas.createSprite("touchpadKnob"));
@@ -401,7 +403,7 @@ public class PoolUI {
 
         float w = stage.getWidth();
         float h = stage.getHeight();
-        
+
         Vector2 position = new Vector2();
         switch (p) {
             //TODO: add the other cases

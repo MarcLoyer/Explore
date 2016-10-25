@@ -58,8 +58,12 @@ import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.UBJsonReader;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.obduratereptile.explore.XBS3pool.PoolInputAdapter;
+import com.obduratereptile.explore.XBS3pool.PoolPhysics;
 import com.obduratereptile.explore.pool.PoolBall;
 import com.obduratereptile.explore.pool.PoolTable;
+
+import aurelienribon.tweenengine.TweenManager;
 
 /**
  * This class is a debugging vehicle for bullet physics based 3d pool. The issue is that the pool
@@ -73,11 +77,11 @@ public class XoppaBulletScreen3 implements Screen {
     final static short OBJECT_FLAG = 1<<9;
     final static short ALL_FLAG = -1;
 
-    ExploreGame game;
-    AssetManager manager;
-    Skin skin;
-    SpriteBatch batch;
-    InputMultiplexer inputMux;
+    public ExploreGame game;
+    public AssetManager manager;
+    public Skin skin;
+    public SpriteBatch batch;
+    public InputMultiplexer inputMux;
 
     class MyContactListener extends ContactListener {
         @Override
@@ -179,34 +183,42 @@ public class XoppaBulletScreen3 implements Screen {
             }
         }
     }
-    ArrayMap<String, GameObject.Constructor> constructors;
+    public ArrayMap<String, GameObject.Constructor> constructors;
 
-    ModelBatch mbatch;
-    ModelBuilder mbuilder;
-    Model model;
-    ArrayMap<String, ModelInstance> instances;
-    Environment env;
+    public ModelBatch mbatch;
+    public ModelBuilder mbuilder;
+    public Model model;
+    public ArrayMap<String, ModelInstance> instances;
+    public ArrayMap<String, ModelInstance> balls;
+    public ArrayMap<String, ModelInstance> otherObjects;
+    public Environment env;
 
-    boolean collision;
-    btCollisionShape groundShape;
-    btCollisionShape ballShape;
-    btCollisionObject groundObject;
-    btCollisionObject ballObject;
-    btCollisionConfiguration collisionConfig;
-    btDispatcher dispatcher;
-    btBroadphaseInterface broadphase;
-    btDynamicsWorld dynamicsWorld;
-    btConstraintSolver constraintSolver;
+    public boolean collision;
+    public btCollisionShape groundShape;
+    public btCollisionShape ballShape;
+    public btCollisionObject groundObject;
+    public btCollisionObject ballObject;
+    public btCollisionConfiguration collisionConfig;
+    public btDispatcher dispatcher;
+    public btBroadphaseInterface broadphase;
+    public btDynamicsWorld dynamicsWorld;
+    public btConstraintSolver constraintSolver;
 
-    Stage stage;
-    StringBuilder stringBuilder;
-    Label lbl_fps;
-    PerspectiveCamera camera;
-    CameraInputController camController;
+    public Stage stage;
+    public StringBuilder stringBuilder;
+    public Label lbl_fps;
+    public PerspectiveCamera camera;
+    public CameraInputController camController;
 
-    TextureAtlas atlas;
+    public PoolInputAdapter poolInputAdapter;
+    public boolean pause = true;
+    public boolean debug = false;
+    public PoolPhysics poolPhysics;
+    public TweenManager tween;
 
-    DebugDrawer debugDrawer;
+    public TextureAtlas atlas;
+
+    public DebugDrawer debugDrawer;
 
     public XoppaBulletScreen3(ExploreGame g) {
         game = g;
@@ -334,49 +346,6 @@ public class XoppaBulletScreen3 implements Screen {
     int id = 1;
     float spawnTimer;
 
-    public void rack(Model mdl) {
-        Vector3 position = new Vector3();
-
-        float dia = 2.25f;
-        float sin = dia * MathUtils.sinDeg(30);
-        float cos = dia * MathUtils.cosDeg(30);
-        Vector3 rowOffset = new Vector3(cos, 0, sin);
-        Vector3 colOffset = new Vector3(0, 0, -dia);
-        rowOffset.scl(1.5f);
-        colOffset.scl(1.5f);
-
-        position.set(-22.6f, 0, 0); // head spot
-        createMySphere(position);
-
-        position.set(22.6f, 0, 0); // foot spot
-        createMySphere(position);
-
-        position.add(rowOffset);
-        createMySphere(position);
-        position.add(colOffset);
-        createMySphere(position);
-
-        rowOffset.z *= -1f;
-        colOffset.z *= -1f;
-        position.add(rowOffset);
-        createMySphere(position);
-        position.add(colOffset);
-        createMySphere(position);
-        position.add(colOffset);
-        createMySphere(position);
-
-        colOffset.z *= -1f;
-        position.add(rowOffset);
-        createMySphere(position);
-        position.add(colOffset);
-        createMySphere(position);
-
-        rowOffset.z *= -1f;
-        colOffset.z *= -1f;
-        position.add(rowOffset);
-        createMySphere(position);
-    }
-
     public void rack2(Model mdl) {
         Vector3 position = new Vector3();
 
@@ -385,61 +354,47 @@ public class XoppaBulletScreen3 implements Screen {
         float cos = dia * MathUtils.cosDeg(30);
         Vector3 rowOffset = new Vector3(cos, 0, sin);
         Vector3 colOffset = new Vector3(0, 0, -dia);
-        rowOffset.scl(1.5f);
-        colOffset.scl(1.5f);
+//        rowOffset.scl(1.5f);
+//        colOffset.scl(1.5f);
 
         position.set(-22.6f, 0, 0); // head spot
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 0, position);
 
         position.set(22.6f, 0, 0); // foot spot
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 1, position);
 
         position.add(rowOffset);
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 2, position);
         position.add(colOffset);
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 3, position);
 
         rowOffset.z *= -1f;
         colOffset.z *= -1f;
         position.add(rowOffset);
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 4, position);
         position.add(colOffset);
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 9, position);
         position.add(colOffset);
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 5, position);
 
         colOffset.z *= -1f;
         position.add(rowOffset);
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 6, position);
         position.add(colOffset);
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 7, position);
 
         rowOffset.z *= -1f;
         colOffset.z *= -1f;
         position.add(rowOffset);
-        createPoolBall(mdl, position);
+        createPoolBall(mdl, 8, position);
     }
 
-    public GameObject createMySphere(Vector3 position) {
-        GameObject obj = constructors.get("mysphere").construct();
-        obj.transform.setToTranslation(position);
-        obj.body.proceedToTransform(obj.transform);
-        obj.body.setUserValue(instances.size);
-        obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-        instances.put("obj_"+id, obj);
-        dynamicsWorld.addRigidBody(obj.body);
-        obj.body.setContactCallbackFlag(OBJECT_FLAG);
-        obj.body.setContactCallbackFilter(GROUND_FLAG);
-        id++;
-        return obj;
-    }
-
-    public PoolBall createPoolBall(Model mdl, Vector3 position) {
+    public PoolBall createPoolBall(Model mdl, int number, Vector3 position) {
         TextureAttribute tA;
         int i = 9;
-        String id = "ball9";
+        String id = (number==0)? "ballcue": "ball"+number;
         tA = new TextureAttribute(TextureAttribute.Diffuse, atlas.createSprite(id));
-        PoolBall obj = new PoolBall(mdl, "ball", i, tA);
+        PoolBall obj = new PoolBall(mdl, "ball", number, tA);
 
         obj.transform.setToTranslation(position);
         ((PoolBall)obj).updateMatrix();
@@ -468,8 +423,6 @@ public class XoppaBulletScreen3 implements Screen {
         obj.body.setContactCallbackFilter(GROUND_FLAG);
         id++;
     }
-
-    float angle, speed = 90f;
 
     @Override
     public void render(float del) {
