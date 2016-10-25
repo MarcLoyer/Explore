@@ -52,10 +52,10 @@ public class PoolPhysics {
         @Override
         public boolean onContactAdded (int userValue0, int partId0, int index0, boolean match0,
                                        int userValue1, int partId1, int index1, boolean match1) {
-//            Gdx.app.error("EX", "collision detected: (" +
-//                    userValue0 + ", " + partId0 + ", " + index0 + ", " + match0 + "), (" +
-//                    userValue1 + ", " + partId1 + ", " + index1 + ", " + match1 + ")"
-//            );
+            Gdx.app.error("EX", "collision detected: (" +
+                    userValue0 + ", " + partId0 + ", " + index0 + ", " + match0 + "), (" +
+                    userValue1 + ", " + partId1 + ", " + index1 + ", " + match1 + ")"
+            );
             return true;
         }
     }
@@ -76,7 +76,8 @@ public class PoolPhysics {
 
         // World units are 1 unit = 1 inch, so gravity is
         // 9.8m.s^2 = 385 inches/s^2
-        dynamicsWorld.setGravity(new Vector3(0, -385f, 0));
+//        dynamicsWorld.setGravity(new Vector3(0, -385f, 0));
+        dynamicsWorld.setGravity(new Vector3(0, -38.5f, 0)); // scale is 10 inches
 
         // add all the PoolBalls to the simulation
         for (int i=0; i<16; i++) {
@@ -85,14 +86,49 @@ public class PoolPhysics {
         }
 
         // add static body (the table) to the simulation
-        btRigidBody bodyTable = ((PoolTable)screen.otherObjects.get("table")).body;
+        PoolTable pt = (PoolTable)screen.otherObjects.get("table");
+        btRigidBody bodyTable = pt.body;
+//        btRigidBody bodyTable = pt.bed.body;
         bodyTable.setUserValue(20);
         bodyTable.setCollisionFlags(bodyTable.getCollisionFlags()
                 | btCollisionObject.CollisionFlags.CF_STATIC_OBJECT);
         bodyTable.setContactCallbackFlag(GROUND_FLAG);
-        bodyTable.setContactCallbackFilter(0);
+        bodyTable.setContactCallbackFilter(ALL_FLAG);
         bodyTable.setActivationState(Collision.DISABLE_DEACTIVATION);
         dynamicsWorld.addRigidBody(bodyTable);
+
+//        for (int i=0; i<pt.cushions.size; i++) {
+//            bodyTable = pt.cushions.get(i).body;
+//            bodyTable.setUserValue(21);
+//            bodyTable.setCollisionFlags(bodyTable.getCollisionFlags()
+//                    | btCollisionObject.CollisionFlags.CF_STATIC_OBJECT);
+//            bodyTable.setContactCallbackFlag(GROUND_FLAG);
+//            bodyTable.setContactCallbackFilter(0);
+//            bodyTable.setActivationState(Collision.DISABLE_DEACTIVATION);
+//            dynamicsWorld.addRigidBody(bodyTable);
+//        }
+//
+//        for (int i=0; i<pt.pocketJackets.size; i++) {
+//            bodyTable = pt.pocketJackets.get(i).body;
+//            bodyTable.setUserValue(22);
+//            bodyTable.setCollisionFlags(bodyTable.getCollisionFlags()
+//                    | btCollisionObject.CollisionFlags.CF_STATIC_OBJECT);
+//            bodyTable.setContactCallbackFlag(GROUND_FLAG);
+//            bodyTable.setContactCallbackFilter(0);
+//            bodyTable.setActivationState(Collision.DISABLE_DEACTIVATION);
+//            dynamicsWorld.addRigidBody(bodyTable);
+//        }
+//
+//        for (int i=0; i<pt.pocketLiners.size; i++) {
+//            bodyTable = pt.pocketLiners.get(i).body;
+//            bodyTable.setUserValue(23);
+//            bodyTable.setCollisionFlags(bodyTable.getCollisionFlags()
+//                    | btCollisionObject.CollisionFlags.CF_STATIC_OBJECT);
+//            bodyTable.setContactCallbackFlag(GROUND_FLAG);
+//            bodyTable.setContactCallbackFilter(0);
+//            bodyTable.setActivationState(Collision.DISABLE_DEACTIVATION);
+//            dynamicsWorld.addRigidBody(bodyTable);
+//        }
 
         // add the cuestick to the simulation
         btRigidBody bodyStick = ((CueStick)screen.otherObjects.get("cuestick")).body;
@@ -113,7 +149,8 @@ public class PoolPhysics {
         //obj.setActivationState(Collision.DISABLE_DEACTIVATION);
         dynamicsWorld.addRigidBody(obj);
         obj.setContactCallbackFlag(OBJECT_FLAG);
-        obj.setContactCallbackFilter(GROUND_FLAG);
+//        obj.setContactCallbackFilter(GROUND_FLAG);
+        obj.setContactCallbackFilter(ALL_FLAG);
     }
 
     public void showBall(int id, Vector3 pos) {
@@ -149,7 +186,7 @@ public class PoolPhysics {
     public void act(float del) {
         final float delta = Math.min(1f / 30f, del);
 
-        dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
+        dynamicsWorld.stepSimulation(delta, 20, 1f/240f);
     }
 
     public void dispose() {

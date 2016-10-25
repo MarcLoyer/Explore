@@ -88,8 +88,20 @@ public class CueStick extends ModelInstance implements Disposable {
         orientation.set(dir);
     }
 
+    public Vector3 getPosition() {
+        transform.getTranslation(position);
+        return position;
+    }
+
     public void setPosition(Vector3 pos) {
         position.set(pos);
+        transform.setTranslation(pos);
+        updateMatrix();
+    }
+
+    public void setupShot(PoolBall ball, Vector3 target) {
+        // TODO: aligns the cue stick to the ball and target, leaving a small distance between the
+        // ball and stick.
     }
 
     public void shoot(float power, PoolBall ball) {

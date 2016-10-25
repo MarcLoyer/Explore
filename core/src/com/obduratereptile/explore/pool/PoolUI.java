@@ -5,8 +5,11 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -24,6 +27,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.obduratereptile.explore.MainMenuScreen;
+
+import aurelienribon.tweenengine.Timeline;
+import aurelienribon.tweenengine.Tween;
 
 /**
  * Created by Marc on 10/5/2016.
@@ -60,7 +66,7 @@ public class PoolUI {
                 new SpriteDrawable(atlas.createSprite("btnRedZoomIn")),
                 new SpriteDrawable(atlas.createSprite("btnRedZoomInPressed"))
         ) {
-            static final private float ZOOMSPEED = 10;
+            static final private float ZOOMSPEED = 12;
 
             @Override
             public void act(float delta) {
@@ -93,7 +99,7 @@ public class PoolUI {
         };
 
         Touchpad touchPan = new Touchpad(5, skin, "default") {
-            static final private float PANSPEED = 10;
+            static final private float PANSPEED = 12;
 
             @Override
             public void act(float delta) {
@@ -202,14 +208,73 @@ public class PoolUI {
         btn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Vector3 position = new Vector3();
+                rackBalls(EIGHTBALL);
+            }
+        });
+        editPopup.add(btn).fillX().row();
 
-                float dia = ((PoolBall)screen.balls.get("ballcue")).radius * 2.0f;
-                float sin = dia * MathUtils.sinDeg(30);
-                float cos = dia * MathUtils.cosDeg(30);
-                Vector3 rowOffset = new Vector3(cos, 0, sin);
-                Vector3 colOffset = new Vector3(0, 0, -dia);
+        btn = new TextButton("Rack 'em up (9ball)", skin, "default");
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                rackBalls(NINEBALL);
+            }
+        });
+        editPopup.add(btn).fillX().row();
 
+        btn = new TextButton("Toggle snap", skin, "default");
+        editPopup.add(btn).fillX().row();
+
+        btn = new TextButton("Exit Edit Mode", skin, "default");
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                screen.poolInputAdapter.state = PoolInputAdapter.State.DISABLED;
+
+                for (int i=0; i<16; i++) {
+                    String key = (i==0)? "ballcue": "ball"+i;
+                    PoolBall ball = (PoolBall)screen.balls.get(key);
+                    //TODO: these don't seem to do anything
+                    ball.body.setLinearVelocity(new Vector3(0,0,0));
+                    ball.body.setAngularVelocity(new Vector3(0,0,0));
+                    ball.updateMatrix();
+                }
+
+                screen.pause = false;
+                editPopup.setVisible(false);
+            }
+        });
+        editPopup.add(btn).fillX().row();
+
+        float w = stage.getWidth();
+        float h = stage.getHeight();
+
+        //TODO: implement other placement cases
+        switch (p) {
+            case ML:
+            default:
+                editPopup.setPosition(120, h/2);
+                break;
+        }
+
+        editPopup.setVisible(false);
+        stage.addActor(editPopup);
+    }
+
+    public static final int EIGHTBALL = 0;
+    public static final int NINEBALL = 1;
+
+    public void rackBalls(int type) {
+        Vector3 position = new Vector3();
+
+        float dia = ((PoolBall)screen.balls.get("ballcue")).radius * 2.0f;
+        float sin = dia * MathUtils.sinDeg(30);
+        float cos = dia * MathUtils.cosDeg(30);
+        Vector3 rowOffset = new Vector3(cos, 0, sin);
+        Vector3 colOffset = new Vector3(0, 0, -dia);
+
+        switch (type) {
+            case EIGHTBALL:
                 position.set(-22.6f, 0, 0); // head spot
                 screen.poolPhysics.showBall(0, position);
 
@@ -253,30 +318,16 @@ public class PoolUI {
                 screen.poolPhysics.showBall(9, position);
                 position.add(colOffset);
                 screen.poolPhysics.showBall(7, position);
-            }
-        });
-        editPopup.add(btn).fillX().row();
-
-        btn = new TextButton("Rack 'em up (9ball)", skin, "default");
-        btn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Vector3 position = new Vector3();
-
-                float dia = ((PoolBall)screen.balls.get("ballcue")).radius * 2.0f;
-                float sin = dia * MathUtils.sinDeg(30);
-                float cos = dia * MathUtils.cosDeg(30);
-                Vector3 rowOffset = new Vector3(cos, 0, sin);
-                Vector3 colOffset = new Vector3(0, 0, -dia);
-
+                break;
+            case NINEBALL:
                 for (int i=10; i<16; i++) {
                     screen.poolPhysics.hideBall(i);
                 }
 
-                position.set(-22.6f, 0, 2); // head spot
+                position.set(-2.26f, 0, 0); // head spot
                 screen.poolPhysics.showBall(0, position);
 
-                position.set(22.6f, 0, 0); // foot spot
+                position.set(2.26f, 0, 0); // foot spot
                 screen.poolPhysics.showBall(1, position);
 
                 position.add(rowOffset);
@@ -303,47 +354,11 @@ public class PoolUI {
                 colOffset.z *= -1f;
                 position.add(rowOffset);
                 screen.poolPhysics.showBall(8, position);
-            }
-        });
-        editPopup.add(btn).fillX().row();
-
-        btn = new TextButton("Toggle snap", skin, "default");
-        editPopup.add(btn).fillX().row();
-
-        btn = new TextButton("Exit Edit Mode", skin, "default");
-        btn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                screen.poolInputAdapter.state = PoolInputAdapter.State.DISABLED;
-
-                for (int i=0; i<16; i++) {
-                    String key = (i==0)? "ballcue": "ball"+i;
-                    PoolBall ball = (PoolBall)screen.balls.get(key);
-                    //TODO: these don't seem to do anything
-                    ball.body.setLinearVelocity(new Vector3(0,0,0));
-                    ball.body.setAngularVelocity(new Vector3(0,0,0));
-                    ball.updateMatrix();
-                }
-
-                screen.pause = false;
-                editPopup.setVisible(false);
-            }
-        });
-        editPopup.add(btn).fillX().row();
-
-        float w = stage.getWidth();
-        float h = stage.getHeight();
-
-        //TODO: implement other placement cases
-        switch (p) {
-            case ML:
+                break;
             default:
-                editPopup.setPosition(120, h/2);
+                assert false;
                 break;
         }
-
-        editPopup.setVisible(false);
-        stage.addActor(editPopup);
     }
 
     private Table shotPopup;
@@ -421,6 +436,15 @@ public class PoolUI {
         status.setText(s);
     }
 
+    public void printObjectStats(ModelInstance b) {
+        Matrix4 m = b.transform;
+        Vector3 v = new Vector3();
+        m.getTranslation(v);
+        Quaternion q = new Quaternion();
+        m.getRotation(q);
+        Gdx.app.error("EX", "position = (" + v.x + ", " + v.y + ", " + v.z + ")    rotation = (" + q.w + ", " + q.x + ", " + q.y + ", " + q.z + ")");
+    }
+
     private Table debugMenu;
     private Label fps;
 
@@ -444,6 +468,34 @@ public class PoolUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 screen.debug = !screen.debug;
+            }
+        });
+        debugMenu.add(btn).fillX().row();
+
+        btn = new TextButton("Ball Stats", skin, "default");
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                printObjectStats(screen.balls.get("ballcue"));
+            }
+        });
+        debugMenu.add(btn).fillX().row();
+
+        btn = new TextButton("Shoot", skin, "default");
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Vector3 p = new Vector3();
+                screen.balls.get("ballcue").transform.getTranslation(p);
+
+                CueStick inst = (CueStick)screen.otherObjects.get("cuestick");
+                Timeline.createSequence()
+                        .push(Tween.set(inst, CueStickAccessor.TYPE_POS).target(p.x-1f, p.y, p.z))
+                        .push(Tween.to(inst, CueStickAccessor.TYPE_POS, 2f).target(p.x-10.0f, p.y, p.z))
+                        .pushPause(0.5f)
+                        .push(Tween.to(inst, CueStickAccessor.TYPE_POS, .2f).target(p.x+2f, p.y, p.z))
+                        .push(Tween.to(inst, CueStickAccessor.TYPE_POS, 1f).target(p.x-6f, p.y, p.z))
+                        .start(screen.tween);
             }
         });
         debugMenu.add(btn).fillX().row();

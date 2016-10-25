@@ -56,6 +56,12 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.obduratereptile.explore.ExploreGame;
 import com.obduratereptile.explore.MainMenuScreen;
 
+import aurelienribon.tweenengine.Timeline;
+import aurelienribon.tweenengine.Tween;
+import aurelienribon.tweenengine.TweenAccessor;
+import aurelienribon.tweenengine.TweenManager;
+import aurelienribon.tweenengine.equations.*;
+
 /**
  * Created by Marc on 9/19/2016.
  */
@@ -88,6 +94,7 @@ public class PoolPlayScreen implements Screen {
 
     TextureAtlas atlas;
 
+    public TweenManager tween;
     PoolPhysics poolPhysics;
 
     boolean debug = false;
@@ -140,6 +147,9 @@ public class PoolPlayScreen implements Screen {
 
         poolInputAdapter = new PoolInputAdapter(this);
         inputMux.addProcessor(poolInputAdapter);
+
+        tween = new TweenManager();
+        Tween.registerAccessor(CueStick.class, new CueStickAccessor());
     }
 
     private void createStage(int w, int h) {
@@ -223,16 +233,32 @@ public class PoolPlayScreen implements Screen {
             tA = new TextureAttribute(TextureAttribute.Diffuse, atlas.createSprite(id));
             inst = new PoolBall(mdl, "ball", i, tA);
 
-            float offset = 4.0f; // 4 inches
-            float x = -1.5f*offset + ((i%4) * offset);
-            float z = -1.5f*offset + ((i/4) * offset);
-            inst.transform.setToTranslation(x, 0, z);
-            ((PoolBall)inst).updateMatrix();
+//            float offset = 4.0f; // 4 inches
+//            float x = -1.5f*offset + ((i%4) * offset);
+//            float z = -1.5f*offset + ((i/4) * offset);
+//            inst.transform.setToTranslation(x, 0, z);
+//            ((PoolBall)inst).updateMatrix();
 
             balls.put(id, inst);
             instances.put(id, inst);
         }
 
+        // TODO: Notes on getting the model scaled right:
+        // http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Scaling_The_World
+        // changing the step interval seemed to help. I'm currently running at 1/240s.
+        // I suspect the large triangles on the Table Bed are a problem. I'll have to
+        // try breaking those up. (But then why doesn't XoppaBullet2 have the same issue?)
+        // I could also try scaling the world to 10in instead of 1in - that would get
+        // the table size down to ~8.
+        //
+        // Update:
+        //  I currently have the world scale set to 10 inches, and I've broken up the Table
+        // Bed into a grid of triangles. None of it made any difference.
+        //  Friction/rolling friction/restitution have the most effect, but they also cause
+        // the balls to not react properly when hit.
+        //  Maybe damping?
+        // Update again:
+        //  I reverted to the original scaling (1 inch) and reverted to the undivided table bed.
         inst = new PoolTable(mdl, "Bed", 20);
         otherObjects.put("table", inst);
         instances.put("table", inst);
@@ -242,7 +268,7 @@ public class PoolPlayScreen implements Screen {
         ((CueStick)inst).updateMatrix();
         ((CueStick)inst).setColor(.0f, .0f, 1.0f);
         otherObjects.put("cuestick", inst);
-        //instances.put("cuestick", inst);
+        instances.put("cuestick", inst);
 
         inst = new ModelInstance(mdl, "HeadArea");
         otherObjects.put("headArea", inst);
@@ -253,6 +279,11 @@ public class PoolPlayScreen implements Screen {
         // TODO: lookup later:
         //  * libGDX FirstPersonCameraController
         //  * libGDX ScreenshotFactory
+
+        // add physics simulator...
+        poolPhysics = new PoolPhysics(this);
+
+        poolUI.rackBalls(PoolUI.EIGHTBALL);
 
 
         env = new Environment();
@@ -266,9 +297,6 @@ public class PoolPlayScreen implements Screen {
         env.add((shadowLight).set(Color.WHITE, shadowDirection));
         env.shadowMap = shadowLight;
         shadowBatch = new ModelBatch(new DepthShaderProvider());
-
-        // adding physics :)
-        poolPhysics = new PoolPhysics(this);
 
         debugDrawer = new DebugDrawer();
         poolPhysics.dynamicsWorld.setDebugDrawer(debugDrawer);
@@ -299,6 +327,7 @@ public class PoolPlayScreen implements Screen {
             // Experimenting with shadows...
             shadowLight.setDirection(shadowDirection.rotate(deg, 0, 1, 0));
         }
+        tween.update(delta);
 
         // adding physics :)
         if (!pause) poolPhysics.act(delta);
@@ -331,7 +360,7 @@ public class PoolPlayScreen implements Screen {
         float aspectRatio = (float)width/(float)height;
         stage.getViewport().update(width, height, false);
         camera = new PerspectiveCamera(35f, 18f*aspectRatio, 18f); //TODO: decide on world size
-        camera.position.set(0f, 90f, 0f);
+        camera.position.set(0f, 90.0f, 0f);
         //camera.direction.set(0f, 1f, 0f);
         camera.lookAt(0,0,0);
         camera.near = 0.1f;

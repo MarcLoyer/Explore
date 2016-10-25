@@ -57,8 +57,8 @@ public class PoolBall extends ModelInstance implements Disposable {
         body.setMotionState(motionState);
 
         // experimenting with these settings...
-        body.setFriction(.3f);
-        body.setRollingFriction(.1f);
+        body.setFriction(.1f);
+        body.setRollingFriction(.01f);
         body.setRestitution(.1f);
     }
 

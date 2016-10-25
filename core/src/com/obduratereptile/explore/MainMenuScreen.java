@@ -106,6 +106,15 @@ public class MainMenuScreen implements Screen {
         });
         table.add(btn).fillX().row();
 
+        btn = new TextButton("Xoppa Bullet 3", skin);
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new XoppaBulletScreen3(game));
+            }
+        });
+        table.add(btn).fillX().row();
+
         // TODO: fix the skin
         Button.ButtonStyle btnStyle = btn.getStyle();
         btnStyle.up = new NinePatchDrawable(atlas.createPatch("btnRedText"));

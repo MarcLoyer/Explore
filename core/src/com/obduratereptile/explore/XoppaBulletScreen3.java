@@ -56,16 +56,19 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
-import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.UBJsonReader;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.obduratereptile.explore.pool.PoolBall;
 import com.obduratereptile.explore.pool.PoolTable;
 
 /**
- * Created by Marc on 9/30/2016.
+ * This class is a debugging vehicle for bullet physics based 3d pool. The issue is that the pool
+ * game has the balls doing random walks, while XoppaBulletScreen2 does not, even though Xoopa2
+ * uses the same pool table and pool balls. This class will start with Xoppa2, and add components
+ * from Pool until the random walk behavior is observed. In that way I hope to gain some insight
+ * into the cause of the behavior.
  */
-public class XoppaBulletScreen2 implements Screen {
+public class XoppaBulletScreen3 implements Screen {
     final static short GROUND_FLAG = 1<<8;
     final static short OBJECT_FLAG = 1<<9;
     final static short ALL_FLAG = -1;
@@ -205,7 +208,7 @@ public class XoppaBulletScreen2 implements Screen {
 
     DebugDrawer debugDrawer;
 
-    public XoppaBulletScreen2(ExploreGame g) {
+    public XoppaBulletScreen3(ExploreGame g) {
         game = g;
         manager = g.manager;
         skin = g.skin;
