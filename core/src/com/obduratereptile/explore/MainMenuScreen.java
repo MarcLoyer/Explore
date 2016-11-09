@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.obduratereptile.explore.Mapper.MapperScreen;
 import com.obduratereptile.explore.pool.PoolPlayScreen;
 
 /**
@@ -66,6 +67,15 @@ public class MainMenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new PlatformerScreen(game));
+            }
+        });
+        table.add(btn).fillX().row();
+
+        btn = new TextButton("Play map game", skin);
+        btn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new MapperScreen(game));
             }
         });
         table.add(btn).fillX().row();

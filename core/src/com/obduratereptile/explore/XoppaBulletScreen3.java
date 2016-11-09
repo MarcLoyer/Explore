@@ -50,19 +50,25 @@ import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.UBJsonReader;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.obduratereptile.explore.XBS3pool.PoolInputAdapter;
 import com.obduratereptile.explore.XBS3pool.PoolPhysics;
+import com.obduratereptile.explore.XBS3pool.PoolUI;
+import com.obduratereptile.explore.pool.CueStick;
+import com.obduratereptile.explore.pool.CueStickAccessor;
 import com.obduratereptile.explore.pool.PoolBall;
 import com.obduratereptile.explore.pool.PoolTable;
 
+import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenManager;
 
 /**
@@ -193,23 +199,12 @@ public class XoppaBulletScreen3 implements Screen {
     public ArrayMap<String, ModelInstance> otherObjects;
     public Environment env;
 
-    public boolean collision;
-    public btCollisionShape groundShape;
-    public btCollisionShape ballShape;
-    public btCollisionObject groundObject;
-    public btCollisionObject ballObject;
-    public btCollisionConfiguration collisionConfig;
-    public btDispatcher dispatcher;
-    public btBroadphaseInterface broadphase;
-    public btDynamicsWorld dynamicsWorld;
-    public btConstraintSolver constraintSolver;
-
     public Stage stage;
     public StringBuilder stringBuilder;
-    public Label lbl_fps;
     public PerspectiveCamera camera;
     public CameraInputController camController;
 
+    public PoolUI poolUI;
     public PoolInputAdapter poolInputAdapter;
     public boolean pause = true;
     public boolean debug = false;
@@ -231,8 +226,14 @@ public class XoppaBulletScreen3 implements Screen {
         Gdx.input.setInputProcessor(inputMux);
 
         instances = new ArrayMap<String, ModelInstance>();
+        balls = new ArrayMap<String, ModelInstance>();
+        otherObjects = new ArrayMap<String, ModelInstance>();
 
-        Bullet.init();
+        poolInputAdapter = new PoolInputAdapter(this);
+        inputMux.addProcessor(poolInputAdapter);
+
+        tween = new TweenManager();
+        Tween.registerAccessor(CueStick.class, new CueStickAccessor());
     }
 
     private void createStage(int w, int h) {
@@ -251,30 +252,24 @@ public class XoppaBulletScreen3 implements Screen {
         atlas = game.manager.get("atlas/textures.pack.atlas", TextureAtlas.class);
 
         // create the UI
-        TextButton btn = new TextButton("MainMenu", skin);
-        btn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new MainMenuScreen(game));
-            }
-        });
-        btn.setPosition(850, 20);
-        btn.setSize(100, 50);
-        stage.addActor(btn);
+        poolUI = new PoolUI(this);
 
-        lbl_fps = new Label("FPS: 0", skin);
-        lbl_fps.setPosition(850, 90);
-        stage.addActor(lbl_fps);
+        poolUI.createCameraControls(PoolUI.Placement.UL);
+        poolUI.createMenuBtn(PoolUI.Placement.UR);
+        poolUI.createEditControls(PoolUI.Placement.ML);
+        poolUI.createShotControls(PoolUI.Placement.ML);
+        poolUI.createStatusLine();
+        poolUI.createDebugMenu(PoolUI.Placement.LR);
+
+        // create the game objects
+        PoolPhysics.init();
 
         mbatch = new ModelBatch();
         mbuilder = new ModelBuilder();
 
-        collisionConfig = new btDefaultCollisionConfiguration();
-        dispatcher = new btCollisionDispatcher(collisionConfig);
-        broadphase = new btDbvtBroadphase();
-        constraintSolver = new btSequentialImpulseConstraintSolver();
-        dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintSolver, collisionConfig);
-        dynamicsWorld.setGravity(new Vector3(0, -10f, 0));
+// !!! THIS IS WHAT IS CAUSING THE INSTABILITY !!!
+//        dynamicsWorld.setGravity(new Vector3(0, -10f, 0));
+//        dynamicsWorld.setGravity(new Vector3(0, -385f, 0));
 
         mbuilder.begin();
         mbuilder.node().id = "ground";
@@ -311,103 +306,57 @@ public class XoppaBulletScreen3 implements Screen {
 
         contactListener = new MyContactListener();
 
-        // create the table static object line by line...
-//        JsonReader jsonReader = new JsonReader();
+
         UBJsonReader jsonReader = new UBJsonReader();
         G3dModelLoader mloaderg3d = new G3dModelLoader(jsonReader);
-//        Model mdl = mloaderg3d.loadModel(Gdx.files.internal("meshes/testtableD.g3dj"));
-//        ModelInstance inst = new PoolTable(mdl, "Bed", 20);
         Model mdl = mloaderg3d.loadModel(Gdx.files.internal("meshes/pool.g3db"));
-        ModelInstance inst = new PoolTable(mdl, "Bed", 20);
-        btRigidBody b = ((PoolTable)inst).body;
-//        btRigidBody b = ((PoolTable)inst).bed.body;
-        b.setUserValue(0);
-        b.setCollisionFlags(b.getCollisionFlags()
-                | btCollisionObject.CollisionFlags.CF_STATIC_OBJECT);
-        b.setContactCallbackFlag(GROUND_FLAG);
-        b.setContactCallbackFilter(0);
-        b.setActivationState(Collision.DISABLE_DEACTIVATION);
-        instances.put("table", inst);
-        dynamicsWorld.addRigidBody(b);
+        ModelInstance inst;
 
-        // create some GameObjects
-        rack2(mdl);
+        // We generate all the balls from a single mesh by assigning the texture of each instance.
+        TextureAttribute tA;
+        for (int i=0; i<16; i++) {
+            String id = (i==15)? "ballcue": "ball"+(i+1);
+            tA = new TextureAttribute(TextureAttribute.Diffuse, atlas.createSprite(id));
+            inst = new PoolBall(mdl, "ball", i, tA);
+
+            balls.put(id, inst);
+            instances.put(id, inst);
+        }
+
+        inst = new PoolTable(mdl, "Bed", 20);
+        otherObjects.put("table", inst);
+        instances.put("table", inst);
+
+        inst = new CueStick(mdl, "CueStick");
+        inst.transform.setToTranslation(0, -10, -10); // get it out of the way
+        ((CueStick)inst).updateMatrix();
+        ((CueStick)inst).setColor(.0f, .0f, 1.0f);
+        otherObjects.put("cuestick", inst);
+        instances.put("cuestick", inst);
+
+        inst = new ModelInstance(mdl, "HeadArea");
+        otherObjects.put("headArea", inst);
+        inst = new ModelInstance(mdl, "BedArea");
+        otherObjects.put("bedArea", inst);
+        //instances.put("headArea", inst);
+
+        // add physics simulator...
+        poolPhysics = new PoolPhysics(this);
+
+        poolUI.rackBalls(PoolUI.EIGHTBALL);
 
         env = new Environment();
         env.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
         env.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
         debugDrawer = new DebugDrawer();
-        dynamicsWorld.setDebugDrawer(debugDrawer);
+        poolPhysics.dynamicsWorld.setDebugDrawer(debugDrawer);
         debugDrawer.setDebugMode(btIDebugDraw.DebugDrawModes.DBG_MAX_DEBUG_DRAW_MODE);
 
     }
 
     int id = 1;
     float spawnTimer;
-
-    public void rack2(Model mdl) {
-        Vector3 position = new Vector3();
-
-        float dia = 2.25f;
-        float sin = dia * MathUtils.sinDeg(30);
-        float cos = dia * MathUtils.cosDeg(30);
-        Vector3 rowOffset = new Vector3(cos, 0, sin);
-        Vector3 colOffset = new Vector3(0, 0, -dia);
-//        rowOffset.scl(1.5f);
-//        colOffset.scl(1.5f);
-
-        position.set(-22.6f, 0, 0); // head spot
-        createPoolBall(mdl, 0, position);
-
-        position.set(22.6f, 0, 0); // foot spot
-        createPoolBall(mdl, 1, position);
-
-        position.add(rowOffset);
-        createPoolBall(mdl, 2, position);
-        position.add(colOffset);
-        createPoolBall(mdl, 3, position);
-
-        rowOffset.z *= -1f;
-        colOffset.z *= -1f;
-        position.add(rowOffset);
-        createPoolBall(mdl, 4, position);
-        position.add(colOffset);
-        createPoolBall(mdl, 9, position);
-        position.add(colOffset);
-        createPoolBall(mdl, 5, position);
-
-        colOffset.z *= -1f;
-        position.add(rowOffset);
-        createPoolBall(mdl, 6, position);
-        position.add(colOffset);
-        createPoolBall(mdl, 7, position);
-
-        rowOffset.z *= -1f;
-        colOffset.z *= -1f;
-        position.add(rowOffset);
-        createPoolBall(mdl, 8, position);
-    }
-
-    public PoolBall createPoolBall(Model mdl, int number, Vector3 position) {
-        TextureAttribute tA;
-        int i = 9;
-        String id = (number==0)? "ballcue": "ball"+number;
-        tA = new TextureAttribute(TextureAttribute.Diffuse, atlas.createSprite(id));
-        PoolBall obj = new PoolBall(mdl, "ball", number, tA);
-
-        obj.transform.setToTranslation(position);
-        ((PoolBall)obj).updateMatrix();
-
-        obj.body.setUserValue(instances.size);
-        obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
-        instances.put("obj_"+this.id, obj);
-        dynamicsWorld.addRigidBody(obj.body);
-        obj.body.setContactCallbackFlag(OBJECT_FLAG);
-        obj.body.setContactCallbackFilter(GROUND_FLAG);
-        this.id++;
-        return obj;
-    }
 
     public void spawn() {
 //        GameObject obj = constructors.values[1 + MathUtils.random(constructors.size - 2)].construct();
@@ -418,7 +367,7 @@ public class XoppaBulletScreen3 implements Screen {
         obj.body.setUserValue(instances.size);
         obj.body.setCollisionFlags(obj.body.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_CUSTOM_MATERIAL_CALLBACK);
         instances.put("obj_"+id, obj);
-        dynamicsWorld.addRigidBody(obj.body);
+        poolPhysics.dynamicsWorld.addRigidBody(obj.body);
         obj.body.setContactCallbackFlag(OBJECT_FLAG);
         obj.body.setContactCallbackFilter(GROUND_FLAG);
         id++;
@@ -436,12 +385,14 @@ public class XoppaBulletScreen3 implements Screen {
         // update the game objects
         final float delta = Math.min(1f / 30f, del);
 
-        dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
+//        dynamicsWorld.stepSimulation(delta, 5, 1f/60f);
+        tween.update(delta);
+        poolPhysics.act(delta);
 
-        if ((spawnTimer -= delta) < 0) {
-            spawn();
-            spawnTimer = 1.5f;
-        }
+//        if ((spawnTimer -= delta) < 0) {
+//            spawn();
+//            spawnTimer = 1.5f;
+//        }
 
         // draw the game objects
         mbatch.begin(camera);
@@ -454,10 +405,6 @@ public class XoppaBulletScreen3 implements Screen {
 
         // manage the UI
         stage.act(delta);
-        stringBuilder.setLength(0);
-        stringBuilder.append("FPS: ").append(Gdx.graphics.getFramesPerSecond());
-        stringBuilder.append("  CNT: ").append(instances.size);
-        lbl_fps.setText(stringBuilder);
         stage.draw();
     }
 
@@ -466,7 +413,8 @@ public class XoppaBulletScreen3 implements Screen {
         float aspectRatio = (float)width/(float)height;
         stage.getViewport().update(width, height, false);
         camera = new PerspectiveCamera(35f, 18f*aspectRatio, 18f); //TODO: decide on world size
-        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,10f);
+        camera.position.set(0f, 90.0f, 0f);
+//        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,10f);
         camera.lookAt(0,0,0);
         camera.near = 0.1f;
         camera.far = 1000f;
@@ -507,12 +455,5 @@ public class XoppaBulletScreen3 implements Screen {
         for (GameObject.Constructor ctor : constructors.values())
             ctor.dispose();
         constructors.clear();
-
-        contactListener.dispose();
-        dispatcher.dispose();
-        collisionConfig.dispose();
-        dynamicsWorld.dispose();
-        constraintSolver.dispose();
-        broadphase.dispose();
     }
 }

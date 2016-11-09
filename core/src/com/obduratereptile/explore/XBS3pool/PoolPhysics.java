@@ -26,30 +26,30 @@ import com.obduratereptile.explore.pool.PoolTable;
  * Created by Marc on 10/7/2016.
  */
 public class PoolPhysics {
-    final static short GROUND_FLAG = 1<<8;
-    final static short OBJECT_FLAG = 1<<9;
-    final static short ALL_FLAG = -1;
+    public final static short GROUND_FLAG = 1<<8;
+    public final static short OBJECT_FLAG = 1<<9;
+    public final static short ALL_FLAG = -1;
 
-    XoppaBulletScreen3 screen;
+    public XoppaBulletScreen3 screen;
 
-    btCollisionConfiguration collisionConfig;
-    btDispatcher dispatcher;
-    btBroadphaseInterface broadphase;
-    btDynamicsWorld dynamicsWorld;
-    btConstraintSolver constraintSolver;
+    public btCollisionConfiguration collisionConfig;
+    public btDispatcher dispatcher;
+    public btBroadphaseInterface broadphase;
+    public btDynamicsWorld dynamicsWorld;
+    public btConstraintSolver constraintSolver;
 
-    class MyContactListener extends ContactListener {
+    public class MyContactListener extends ContactListener {
         @Override
         public boolean onContactAdded (int userValue0, int partId0, int index0, boolean match0,
                                        int userValue1, int partId1, int index1, boolean match1) {
-            Gdx.app.error("EX", "collision detected: (" +
-                    userValue0 + ", " + partId0 + ", " + index0 + ", " + match0 + "), (" +
-                    userValue1 + ", " + partId1 + ", " + index1 + ", " + match1 + ")"
-            );
+//            Gdx.app.error("EX", "collision detected: (" +
+//                    userValue0 + ", " + partId0 + ", " + index0 + ", " + match0 + "), (" +
+//                    userValue1 + ", " + partId1 + ", " + index1 + ", " + match1 + ")"
+//            );
             return true;
         }
     }
-    MyContactListener contactListener;
+    public MyContactListener contactListener;
 
     static public void init() {
         Bullet.init();
@@ -67,7 +67,8 @@ public class PoolPhysics {
         // World units are 1 unit = 1 inch, so gravity is
         // 9.8m.s^2 = 385 inches/s^2
 //        dynamicsWorld.setGravity(new Vector3(0, -385f, 0));
-        dynamicsWorld.setGravity(new Vector3(0, -38.5f, 0)); // scale is 10 inches
+        dynamicsWorld.setGravity(new Vector3(0, -10f, 0));
+//        dynamicsWorld.setGravity(new Vector3(0, -38.5f, 0)); // scale is 10 inches
 
         // add all the PoolBalls to the simulation
         for (int i=0; i<16; i++) {
@@ -176,7 +177,8 @@ public class PoolPhysics {
     public void act(float del) {
         final float delta = Math.min(1f / 30f, del);
 
-        dynamicsWorld.stepSimulation(delta, 20, 1f/240f);
+//        dynamicsWorld.stepSimulation(delta, 20, 1f/60f);
+        dynamicsWorld.stepSimulation(10*del, 20, 1f/60f);
     }
 
     public void dispose() {
